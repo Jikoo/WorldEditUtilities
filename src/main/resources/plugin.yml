@@ -1,0 +1,16 @@
+name: WorldEditUtilites
+main: com.github.jikoo.worldeditutilites.WorldEditUtilites
+version: 1.0
+author: Jikoo
+depend: [WorldEdit]
+
+permissions:
+ worldeditutilities.deletechunks:
+  description: Permission to use /deletechunks
+  default: op
+
+commands:
+ deletechunks:
+  description: Delete chunks inside of selection on disk. Ensure that no one is in the area.
+  permission: worldeditutilities.deletechunks
+  usage: /deletechunks
