@@ -45,10 +45,15 @@ public class WorldEditUtilities extends JavaPlugin {
 				sender.sendMessage("Your selection is not set!");
 				return true;
 			}
+			if (args.length < 1 || !args[0].equalsIgnoreCase("confirm")) {
+				sender.sendMessage("This action cannot be undone. Please use /deletechunks confirm to actually delete the selected chunks.");
+				return true;
+			}
+			sender.sendMessage("Attempting to delete chunks. Any chunk inside of a region (32x32 chunks) that has any chunk loaded may not be deleted properly.");
 			int startX = selection.getMinimumPoint().getChunk().getX();
 			int startZ = selection.getMinimumPoint().getChunk().getZ();
-			int endX = selection.getMaximumPoint().getChunk().getX() - startX + 1;
-			int endZ = selection.getMinimumPoint().getChunk().getZ() - startZ + 1;
+			int endX = selection.getMaximumPoint().getChunk().getX() + 1;
+			int endZ = selection.getMaximumPoint().getChunk().getZ() + 1;
 			HashMap<Pair<Integer, Integer>, ArrayList<Pair<Integer, Integer>>> toDelete = new HashMap<>();
 			for (int chunkX = startX; chunkX < endX; chunkX++) {
 				for (int chunkZ = startZ; chunkZ < endZ; chunkZ++) {
@@ -56,7 +61,7 @@ public class WorldEditUtilities extends JavaPlugin {
 					if (!toDelete.containsKey(region)) {
 						toDelete.put(region, new ArrayList<Pair<Integer, Integer>>());
 					}
-					toDelete.get(region).add(new ImmutablePair<>(chunkX - region.getLeft() << 5, chunkZ - region.getRight() << 5));
+					toDelete.get(region).add(new ImmutablePair<>(chunkX - (region.getLeft() << 5), chunkZ - (region.getRight() << 5)));
 				}
 			}
 			File folder = new File(selection.getWorld().getWorldFolder(), "region");
@@ -87,13 +92,17 @@ public class WorldEditUtilities extends JavaPlugin {
 				}
 				try (RandomAccessFile regionRandomAccess = new RandomAccessFile(regionFile, "rwd")) {
 					for (Pair<Integer, Integer> chunkCoords : entry.getValue()) {
-						// Pointers for chunks are 4 byte integers stored at coordinates relative to the region file itself.
+						// Pointers for chunks are 4 byte integers
 						long chunkPointer = 4 * (chunkCoords.getLeft() + chunkCoords.getRight() * 32);
 						regionRandomAccess.seek(chunkPointer);
 						regionRandomAccess.writeInt(0);
 					}
-				} catch (IOException ex) {}
+				} catch (IOException ex) {
+					sender.sendMessage("An exception occurred writing " + regionFile.getName() + "! Some chunks will not be deleted.");
+				}
 			}
+			sender.sendMessage("Chunks wiped.");
+			return true;
 		}
 		return false;
 	}

@@ -1,5 +1,5 @@
-name: WorldEditUtilites
-main: com.github.jikoo.worldeditutilites.WorldEditUtilites
+name: WorldEditUtilities
+main: com.github.jikoo.worldeditutilities.WorldEditUtilities
 version: 1.0
 author: Jikoo
 depend: [WorldEdit]
